@@ -6083,10 +6083,6 @@ bool is_downloading_state(int const st)
 		if (!web->have_files.empty()
 			&& web->have_files.none_set()) return;
 
-		std::shared_ptr<aux::socket_type> s
-			= std::make_shared<aux::socket_type>();
-		if (!s) return;
-
 		void* userdata = nullptr;
 #ifdef TORRENT_USE_OPENSSL
 		const bool ssl = string_begins_no_case("https://", web->url.c_str());
@@ -6096,10 +6092,9 @@ bool is_downloading_state(int const st)
 			if (!userdata) userdata = m_ses.ssl_ctx();
 		}
 #endif
-		bool ret = instantiate_connection(m_ses.get_context(), m_ses.proxy()
-			, *s, userdata, nullptr, true, false);
-		(void)ret;
-		TORRENT_ASSERT(ret);
+		std::shared_ptr<aux::socket_type> s = std::make_shared<aux::socket_type>(
+			instantiate_connection(m_ses.get_context()
+			, m_ses.proxy(), userdata, nullptr, true, false));
 
 		if (boost::get<http_stream>(s.get()))
 		{
@@ -6793,7 +6788,7 @@ bool is_downloading_state(int const st)
 			|| !m_ip_filter
 			|| (m_ip_filter->access(peerinfo->address()) & ip_filter::blocked) == 0);
 
-		std::shared_ptr<aux::socket_type> s = std::make_shared<aux::socket_type>();
+		std::shared_ptr<aux::socket_type> s;
 
 #if TORRENT_USE_I2P
 		bool const i2p = peerinfo->is_i2p_addr;
@@ -6812,10 +6807,8 @@ bool is_downloading_state(int const st)
 			// one. The main feature of a peer connection is that whether or not we
 			// proxy it is configurable. When we use i2p, we want to always prox
 			// everything via i2p.
-			bool const ret = instantiate_connection(m_ses.get_context()
-				, m_ses.i2p_proxy(), *s, nullptr, nullptr, false, false);
-			(void)ret;
-			TORRENT_ASSERT(ret);
+			s = std::make_shared<aux::socket_type>(instantiate_connection(m_ses.get_context()
+				, m_ses.i2p_proxy(), nullptr, nullptr, false, false));
 			boost::get<i2p_stream>(*s).set_destination(static_cast<i2p_peer*>(peerinfo)->dest());
 			boost::get<i2p_stream>(*s).set_command(i2p_stream::cmd_connect);
 			boost::get<i2p_stream>(*s).set_session_id(m_ses.i2p_session());
@@ -6862,10 +6855,8 @@ bool is_downloading_state(int const st)
 			}
 #endif
 
-			bool ret = instantiate_connection(m_ses.get_context()
-				, m_ses.proxy(), *s, userdata, sm, true, false);
-			(void)ret;
-			TORRENT_ASSERT(ret);
+			s = std::make_shared<aux::socket_type>(instantiate_connection(m_ses.get_context()
+				, m_ses.proxy(), userdata, sm, true, false));
 
 #if defined TORRENT_USE_OPENSSL
 			if (is_ssl_torrent())
