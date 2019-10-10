@@ -54,6 +54,8 @@ public:
 
 	explicit proxy_base(io_context& io_context);
 	~proxy_base();
+	proxy_base(proxy_base&&) = default;
+	proxy_base& operator=(proxy_base&&) = default;
 	proxy_base(proxy_base const&) = delete;
 	proxy_base& operator=(proxy_base const&) = delete;
 

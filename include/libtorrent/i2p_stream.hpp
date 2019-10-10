@@ -105,6 +105,7 @@ class i2p_stream : public proxy_base
 public:
 
 	explicit i2p_stream(io_context& io_context);
+	i2p_stream(i2p_stream&&) = default;
 #if TORRENT_USE_ASSERTS
 	~i2p_stream();
 #endif
